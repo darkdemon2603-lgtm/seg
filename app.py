@@ -223,10 +223,41 @@ with tabs[3]:
         else: st.caption("Upload item-level sales to identify best sellers.")
     with r:
         st.markdown("**Who comes for what?**")
-        if "occasion" in customers:
-            st.dataframe(customers.groupby("occasion",dropna=False).agg(Customers=("customer_id","nunique"),Avg_spend=("monetary_value","mean")).reset_index(),use_container_width=True,hide_index=True)
-        else:
-            st.write("Add survey/profile fields such as occasion, party_type, visit_motivation or dietary_preference. Do not infer motivations from transaction data alone.")
+       if "occasion" in customers:
+    occasion_data = customers.copy()
+
+    if "customer_id" not in occasion_data.columns:
+        occasion_data["customer_id"] = range(len(occasion_data))
+
+    if "monetary_value" not in occasion_data.columns:
+        occasion_data["monetary_value"] = np.nan
+
+    occasion_summary = (
+        occasion_data.groupby("occasion", dropna=False)
+        .agg(
+            Customers=("customer_id", "nunique"),
+            Avg_spend=("monetary_value", "mean")
+        )
+        .reset_index()
+    )
+
+    st.dataframe(
+        occasion_summary,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    if occasion_data["monetary_value"].isna().all():
+        st.caption(
+            "Average spend is unavailable because customer profiles "
+            "are not linked to transaction spend. Upload transactions "
+            "with matching customer IDs and spend values."
+        )
+else:
+    st.write(
+        "Add profile fields such as occasion, party_type, "
+        "visit_motivation or dietary_preference."
+    )
     st.markdown("**Research questions worth answering**")
     st.write("- Which occasions are under-served or under-promoted?\n- What needs drive choice: socialising, convenience, indulgence, novelty or value?\n- Which groups buy across categories, and which only buy a main?\n- What would make a first visit become a repeat visit?")
     st.caption("Needs and attitudes should come from research or explicitly collected data—not be fabricated by an algorithm.")
