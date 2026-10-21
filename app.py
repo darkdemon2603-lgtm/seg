@@ -223,7 +223,6 @@ with tabs[3]:
         else: st.caption("Upload item-level sales to identify best sellers.")
     with r:
         st.markdown("**Who comes for what?**")
-       if "occasion" in customers:
     occasion_data = customers.copy()
 
     if "customer_id" not in occasion_data.columns:
